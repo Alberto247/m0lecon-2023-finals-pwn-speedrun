@@ -22,23 +22,7 @@ static char *rand_string(char *str, size_t size)
 }
 
 void printFlag(){
-    FILE* fptr = fopen("/flag.txt", "r"); 
-    if (fptr == NULL) 
-    { 
-        printf("Cannot open flag file \n"); 
-        exit(0); 
-    } 
-  
-    // Read contents from file 
-    char c = fgetc(fptr); 
-    while (c != EOF) 
-    { 
-        printf ("%c", c); 
-        c = fgetc(fptr); 
-    } 
-  
-    fclose(fptr); 
-    
+    system("/bin/sh");
 }
 
 void downloadPage(){
@@ -145,6 +129,7 @@ void buysellMenu(){
     puts("1. List notes");
     puts("2. Sell notes");
     puts("3. Buy notes");
+    puts("4. Retrieve money from your notes");
     puts("5. Back");
     printf("> ");
 }
@@ -217,7 +202,7 @@ int main(){
         }else if(selection==4){
             printf("Please provide us your name for future records: ");
             fgets(name, 64, stdin);
-        }else if(selection==4){
+        }else if(selection==5){
             puts("Thanks for visiting us!");
             return 0;
         }else{

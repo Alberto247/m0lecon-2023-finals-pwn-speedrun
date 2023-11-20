@@ -4,10 +4,14 @@ RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y socat wget
 RUN apt-get install -y libssl-dev
 
-COPY chall /
-COPY entrypoint.sh /
+RUN useradd -ms /bin/sh pwn
 
-RUN chmod +x /chall
-RUN chmod +x /entrypoint.sh
+WORKDIR /home/pwn
 
-CMD ["/entrypoint.sh"]
+COPY ./chall ./
+
+COPY ./entrypoint.sh ./
+
+RUN chown -R root:pwn /home/pwn && chmod 750 /home/pwn  && chmod 550 entrypoint.sh
+
+CMD ["/home/pwn/entrypoint.sh"]
